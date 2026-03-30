@@ -1,4 +1,4 @@
-package s01
+package envutil
 
 import (
 	"bufio"
@@ -29,6 +29,7 @@ func LoadDotEnv(path string) error {
 		if !ok {
 			continue
 		}
+
 		key := strings.TrimSpace(k)
 		val := strings.TrimSpace(v)
 		val = strings.Trim(val, `"'`)

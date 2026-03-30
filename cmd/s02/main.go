@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"os"
 
-	"go-pilot/internal/s01"
+	"go-pilot/internal/s02"
 	"go-pilot/internal/shared/repl"
 )
 
 func main() {
-	agent, err := s01.NewAgent()
+	agent, err := s02.NewAgent()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "init error:", err)
 		os.Exit(1)
 	}
 
-	repl.Run("s01 >> ", agent.RunTurn)
+	repl.Run("s02 >> ", agent.RunTurn)
 }

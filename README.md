@@ -8,6 +8,7 @@ Go rewrite project for `learn-claude-code`.
 - [x] Project scaffold
 - [x] `s01`: minimal agent loop with one `bash` tool
 - [x] OpenAI-compatible provider only
+- [x] `s02`: tool dispatch (`bash` + `read_file` + `write_file` + `edit_file`)
 
 ## Run s01
 
@@ -18,4 +19,12 @@ Copy-Item .env.example .env
 #   MODEL_ID + OPENAI_API_KEY
 #   Optional: OPENAI_BASE_URL for compatible providers
 go run ./cmd/s01
+```
+
+## Run s02
+
+```powershell
+cd go-pilot
+Copy-Item .env.example .env
+go run ./cmd/s02
 ```

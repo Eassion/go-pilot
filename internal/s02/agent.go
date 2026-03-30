@@ -1,0 +1,356 @@
+package s02
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"time"
+
+	"go-pilot/internal/shared/envutil"
+	"go-pilot/internal/shared/openai"
+)
+
+const (
+	maxOutputChars   = 50000
+	maxTokensPerCall = 8000
+	commandTimeout   = 120 * time.Second
+)
+
+type bashInput struct {
+	Command string `json:"command"`
+}
+
+type readInput struct {
+	Path  string `json:"path"`
+	Limit int    `json:"limit,omitempty"`
+}
+
+type writeInput struct {
+	Path    string `json:"path"`
+	Content string `json:"content"`
+}
+
+type editInput struct {
+	Path    string `json:"path"`
+	OldText string `json:"old_text"`
+	NewText string `json:"new_text"`
+}
+
+type toolHandler func(arguments string) string
+
+type Agent struct {
+	client   *openai.Client
+	modelID  string
+	workDir  string
+	system   string
+	tools    []openai.ToolDef
+	handlers map[string]toolHandler
+	history  []openai.Message
+}
+
+func NewAgent() (*Agent, error) {
+	_ = envutil.LoadDotEnv(".env")
+
+	cfg, err := openai.ConfigFromEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	workDir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	a := &Agent{
+		client:  openai.NewClient(cfg.APIKey, cfg.BaseURL, 180*time.Second),
+		modelID: cfg.ModelID,
+		workDir: workDir,
+		system:  fmt.Sprintf("You are a coding agent at %s. Use tools to solve tasks. Act, don't explain.", workDir),
+		tools:   buildTools(),
+	}
+	a.handlers = map[string]toolHandler{
+		"bash":       a.handleBash,
+		"read_file":  a.handleReadFile,
+		"write_file": a.handleWriteFile,
+		"edit_file":  a.handleEditFile,
+	}
+
+	return a, nil
+}
+
+func buildTools() []openai.ToolDef {
+	return []openai.ToolDef{
+		{
+			Name:        "bash",
+			Description: "Run a shell command.",
+			InputSchema: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"command": map[string]any{"type": "string"},
+				},
+				"required": []string{"command"},
+			},
+		},
+		{
+			Name:        "read_file",
+			Description: "Read file contents.",
+			InputSchema: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"path":  map[string]any{"type": "string"},
+					"limit": map[string]any{"type": "integer"},
+				},
+				"required": []string{"path"},
+			},
+		},
+		{
+			Name:        "write_file",
+			Description: "Write content to file.",
+			InputSchema: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"path":    map[string]any{"type": "string"},
+					"content": map[string]any{"type": "string"},
+				},
+				"required": []string{"path", "content"},
+			},
+		},
+		{
+			Name:        "edit_file",
+			Description: "Replace exact text in file.",
+			InputSchema: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"path":     map[string]any{"type": "string"},
+					"old_text": map[string]any{"type": "string"},
+					"new_text": map[string]any{"type": "string"},
+				},
+				"required": []string{"path", "old_text", "new_text"},
+			},
+		},
+	}
+}
+
+func (a *Agent) RunTurn(query string) error {
+	if len(a.history) == 0 {
+		a.history = append(a.history, openai.Message{
+			Role:    "system",
+			Content: a.system,
+		})
+	}
+
+	a.history = append(a.history, openai.Message{
+		Role:    "user",
+		Content: query,
+	})
+
+	for {
+		resp, err := a.client.ChatCompletions(context.Background(), a.modelID, a.history, a.tools, maxTokensPerCall)
+		if err != nil {
+			return err
+		}
+		if len(resp.Choices) == 0 {
+			return errors.New("model response has no choices")
+		}
+
+		msg := resp.Choices[0].Message
+		a.history = append(a.history, msg)
+
+		if len(msg.ToolCalls) == 0 {
+			text, _ := msg.Content.(string)
+			if strings.TrimSpace(text) == "" {
+				fmt.Println("(no text response)")
+			} else {
+				fmt.Println(text)
+			}
+			return nil
+		}
+
+		for _, tc := range msg.ToolCalls {
+			handler := a.handlers[tc.Function.Name]
+			output := fmt.Sprintf("Unknown tool: %s", tc.Function.Name)
+			if handler != nil {
+				output = handler(tc.Function.Arguments)
+			}
+
+			fmt.Printf("> %s:\n", tc.Function.Name)
+			fmt.Println(preview(output, 200))
+
+			a.history = append(a.history, openai.Message{
+				Role:       "tool",
+				ToolCallID: tc.ID,
+				Content:    output,
+			})
+		}
+	}
+}
+
+func (a *Agent) handleBash(arguments string) string {
+	var in bashInput
+	if err := json.Unmarshal([]byte(arguments), &in); err != nil {
+		return "Error: invalid tool input"
+	}
+	return runBash(a.workDir, in.Command)
+}
+
+func (a *Agent) handleReadFile(arguments string) string {
+	var in readInput
+	if err := json.Unmarshal([]byte(arguments), &in); err != nil {
+		return "Error: invalid tool input"
+	}
+	if strings.TrimSpace(in.Path) == "" {
+		return "Error: path is required"
+	}
+	return runRead(a.workDir, in.Path, in.Limit)
+}
+
+func (a *Agent) handleWriteFile(arguments string) string {
+	var in writeInput
+	if err := json.Unmarshal([]byte(arguments), &in); err != nil {
+		return "Error: invalid tool input"
+	}
+	if strings.TrimSpace(in.Path) == "" {
+		return "Error: path is required"
+	}
+	return runWrite(a.workDir, in.Path, in.Content)
+}
+
+func (a *Agent) handleEditFile(arguments string) string {
+	var in editInput
+	if err := json.Unmarshal([]byte(arguments), &in); err != nil {
+		return "Error: invalid tool input"
+	}
+	if strings.TrimSpace(in.Path) == "" {
+		return "Error: path is required"
+	}
+	return runEdit(a.workDir, in.Path, in.OldText, in.NewText)
+}
+
+func runBash(workDir, command string) string {
+	dangerous := []string{"rm -rf /", "sudo", "shutdown", "reboot", "> /dev/"}
+	for _, d := range dangerous {
+		if strings.Contains(command, d) {
+			return "Error: Dangerous command blocked"
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), commandTimeout)
+	defer cancel()
+
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmd = exec.CommandContext(ctx, "powershell", "-Command", command)
+	} else {
+		cmd = exec.CommandContext(ctx, "bash", "-lc", command)
+	}
+	cmd.Dir = workDir
+
+	out, err := cmd.CombinedOutput()
+	if ctx.Err() == context.DeadlineExceeded {
+		return "Error: Timeout (120s)"
+	}
+	text := strings.TrimSpace(string(out))
+	if err != nil && text == "" {
+		text = err.Error()
+	}
+	if text == "" {
+		text = "(no output)"
+	}
+	return truncate(text, maxOutputChars)
+}
+
+func runRead(workDir, path string, limit int) string {
+	fp, err := safePath(workDir, path)
+	if err != nil {
+		return "Error: " + err.Error()
+	}
+	raw, err := os.ReadFile(fp)
+	if err != nil {
+		return "Error: " + err.Error()
+	}
+
+	lines := strings.Split(strings.ReplaceAll(string(raw), "\r\n", "\n"), "\n")
+	if len(lines) > 0 && lines[len(lines)-1] == "" {
+		lines = lines[:len(lines)-1]
+	}
+
+	if limit > 0 && limit < len(lines) {
+		lines = append(lines[:limit], fmt.Sprintf("... (%d more lines)", len(lines)-limit))
+	}
+	return truncate(strings.Join(lines, "\n"), maxOutputChars)
+}
+
+func runWrite(workDir, path, content string) string {
+	fp, err := safePath(workDir, path)
+	if err != nil {
+		return "Error: " + err.Error()
+	}
+	if err := os.MkdirAll(filepath.Dir(fp), 0o755); err != nil {
+		return "Error: " + err.Error()
+	}
+	if err := os.WriteFile(fp, []byte(content), 0o644); err != nil {
+		return "Error: " + err.Error()
+	}
+	return fmt.Sprintf("Wrote %d bytes to %s", len(content), path)
+}
+
+func runEdit(workDir, path, oldText, newText string) string {
+	fp, err := safePath(workDir, path)
+	if err != nil {
+		return "Error: " + err.Error()
+	}
+	raw, err := os.ReadFile(fp)
+	if err != nil {
+		return "Error: " + err.Error()
+	}
+
+	content := string(raw)
+	if !strings.Contains(content, oldText) {
+		return fmt.Sprintf("Error: Text not found in %s", path)
+	}
+	updated := strings.Replace(content, oldText, newText, 1)
+	if err := os.WriteFile(fp, []byte(updated), 0o644); err != nil {
+		return "Error: " + err.Error()
+	}
+	return fmt.Sprintf("Edited %s", path)
+}
+
+func safePath(workDir, p string) (string, error) {
+	baseAbs, err := filepath.Abs(workDir)
+	if err != nil {
+		return "", err
+	}
+	targetAbs, err := filepath.Abs(filepath.Join(baseAbs, p))
+	if err != nil {
+		return "", err
+	}
+
+	rel, err := filepath.Rel(baseAbs, targetAbs)
+	if err != nil {
+		return "", err
+	}
+	if rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
+		return "", fmt.Errorf("path escapes workspace: %s", p)
+	}
+	return targetAbs, nil
+}
+
+func preview(s string, max int) string {
+	if len(s) <= max {
+		return s
+	}
+	return s[:max] + "..."
+}
+
+func truncate(s string, max int) string {
+	if len(s) <= max {
+		return s
+	}
+	return s[:max]
+}
