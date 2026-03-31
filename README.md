@@ -9,6 +9,7 @@ Go rewrite project for `learn-claude-code`.
 - [x] `s01`: minimal agent loop with one `bash` tool
 - [x] OpenAI-compatible provider only
 - [x] `s02`: tool dispatch (`bash` + `read_file` + `write_file` + `edit_file`)
+- [x] `s03`: todo planning tool + progress reminder (nag after 3 rounds)
 
 ## Run s01
 
@@ -27,4 +28,12 @@ go run ./cmd/s01
 cd go-pilot
 Copy-Item .env.example .env
 go run ./cmd/s02
+```
+
+## Run s03
+
+```powershell
+cd go-pilot
+Copy-Item .env.example .env
+go run ./cmd/s03
 ```
