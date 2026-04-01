@@ -10,6 +10,8 @@ Go rewrite project for `learn-claude-code`.
 - [x] OpenAI-compatible provider only
 - [x] `s02`: tool dispatch (`bash` + `read_file` + `write_file` + `edit_file`)
 - [x] `s03`: todo planning tool + progress reminder (nag after 3 rounds)
+- [x] `s04`: subagent delegation tool (`task`)
+- [x] `s05`: skill loading (`load_skill` from `skills/**/SKILL.md`)
 
 ## Run s01
 
@@ -36,4 +38,20 @@ go run ./cmd/s02
 cd go-pilot
 Copy-Item .env.example .env
 go run ./cmd/s03
+```
+
+## Run s04
+
+```powershell
+cd go-pilot
+Copy-Item .env.example .env
+go run ./cmd/s04
+```
+
+## Run s05
+
+```powershell
+cd go-pilot
+Copy-Item .env.example .env
+go run ./cmd/s05
 ```
