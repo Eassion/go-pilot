@@ -12,6 +12,7 @@ Go rewrite project for `learn-claude-code`.
 - [x] `s03`: todo planning tool + progress reminder (nag after 3 rounds)
 - [x] `s04`: subagent delegation tool (`task`)
 - [x] `s05`: skill loading (`load_skill` from `skills/**/SKILL.md`)
+- [x] `s06`: context compact (micro/auto/manual compression + `.transcripts/`)
 
 ## Run s01
 
@@ -54,4 +55,12 @@ go run ./cmd/s04
 cd go-pilot
 Copy-Item .env.example .env
 go run ./cmd/s05
+```
+
+## Run s06
+
+```powershell
+cd go-pilot
+Copy-Item .env.example .env
+go run ./cmd/s06
 ```
