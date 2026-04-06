@@ -1,0 +1,8 @@
+{
+  "id": 1,
+  "subject": "Setup project",
+  "description": "Initialize the project structure, set up dependencies, and configure the development environment.",
+  "status": "pending",
+  "blockedBy": [],
+  "owner": ""
+}
