@@ -15,6 +15,7 @@ Go rewrite project for `learn-claude-code`.
 - [x] `s06`: context compact (micro/auto/manual compression + `.transcripts/`)
 - [x] `s07`: persistent task system (`task_create/update/list/get` in `.tasks/`)
 - [x] `s08`: background tasks (`background_run/check_background` + notification injection)
+- [x] `s09`: agent teams (`spawn_teammate/send_message/read_inbox/broadcast` + `.team/`)
 
 ## Run s01
 
@@ -81,4 +82,12 @@ go run ./cmd/s07
 cd go-pilot
 Copy-Item .env.example .env
 go run ./cmd/s08
+```
+
+## Run s09
+
+```powershell
+cd go-pilot
+Copy-Item .env.example .env
+go run ./cmd/s09
 ```
