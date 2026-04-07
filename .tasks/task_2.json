@@ -1,10 +1,8 @@
 {
   "id": 2,
-  "subject": "Write code",
-  "description": "Implement the core functionality and features of the project.",
-  "status": "pending",
-  "blockedBy": [
-    1
-  ],
-  "owner": ""
+  "subject": "Add database migration scripts",
+  "description": "Create database migration scripts for the new user table and related schema changes. Use SQL migration files with versioning support.",
+  "status": "in_progress",
+  "blockedBy": [],
+  "owner": "alice"
 }

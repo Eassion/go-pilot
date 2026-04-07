@@ -3,13 +3,18 @@
   "members": [
     {
       "name": "alice",
-      "role": "coder",
-      "status": "idle"
+      "role": "backend-developer",
+      "status": "working"
     },
     {
       "name": "bob",
-      "role": "tester",
-      "status": "idle"
+      "role": "fullstack-developer",
+      "status": "working"
+    },
+    {
+      "name": "CoderCharlie",
+      "role": "coder",
+      "status": "working"
     }
   ]
 }

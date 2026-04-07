@@ -17,6 +17,7 @@ Go rewrite project for `learn-claude-code`.
 - [x] `s08`: background tasks (`background_run/check_background` + notification injection)
 - [x] `s09`: agent teams (`spawn_teammate/send_message/read_inbox/broadcast` + `.team/`)
 - [x] `s10`: team protocols (`shutdown_request/response` + `plan_approval` with request_id tracking)
+- [x] `s11`: autonomous agents (`idle/claim_task` + task-board polling + auto-claim)
 
 ## Run s01
 
@@ -99,4 +100,12 @@ go run ./cmd/s09
 cd go-pilot
 Copy-Item .env.example .env
 go run ./cmd/s10
+```
+
+## Run s11
+
+```powershell
+cd go-pilot
+Copy-Item .env.example .env
+go run ./cmd/s11
 ```
