@@ -1,0 +1,22 @@
+{
+  "worktrees": [
+    {
+      "name": "auth-refactor",
+      "path": "D:\\Projects\\go\\GoPilot\\go-pilot\\.worktrees\\auth-refactor",
+      "branch": "wt/auth-refactor",
+      "task_id": 1,
+      "status": "removed",
+      "created_at": 1775551258.4899833,
+      "removed_at": 1775551377.7037628
+    },
+    {
+      "name": "ui-login",
+      "path": "D:\\Projects\\go\\GoPilot\\go-pilot\\.worktrees\\ui-login",
+      "branch": "wt/ui-login",
+      "task_id": 2,
+      "status": "kept",
+      "created_at": 1775551261.4881916,
+      "kept_at": 1775551342.1268618
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": 4,
+  "subject": "Implement backend authentication system",
+  "description": "Create JWT-based authentication system with user registration, login, token validation, and protected routes",
+  "status": "pending",
+  "blockedBy": [],
+  "owner": "",
+  "worktree": "",
+  "created_at": 1775551201.4756994,
+  "updated_at": 1775551201.4756994
+}

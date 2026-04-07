@@ -1,0 +1,8 @@
+{"event":"worktree.create.before","task":{"id":1},"ts":1775551258.2152302,"worktree":{"base_ref":"HEAD","name":"auth-refactor"}}
+{"event":"worktree.create.after","task":{"id":1},"ts":1775551258.490579,"worktree":{"branch":"wt/auth-refactor","name":"auth-refactor","path":"D:\\Projects\\go\\GoPilot\\go-pilot\\.worktrees\\auth-refactor","status":"active"}}
+{"event":"worktree.create.before","task":{"id":2},"ts":1775551261.2501316,"worktree":{"base_ref":"HEAD","name":"ui-login"}}
+{"event":"worktree.create.after","task":{"id":2},"ts":1775551261.4892316,"worktree":{"branch":"wt/ui-login","name":"ui-login","path":"D:\\Projects\\go\\GoPilot\\go-pilot\\.worktrees\\ui-login","status":"active"}}
+{"event":"worktree.keep","task":{"id":2},"ts":1775551342.1273744,"worktree":{"name":"ui-login","path":"D:\\Projects\\go\\GoPilot\\go-pilot\\.worktrees\\ui-login","status":"kept"}}
+{"event":"worktree.remove.before","task":{"id":1},"ts":1775551377.571098,"worktree":{"name":"auth-refactor","path":"D:\\Projects\\go\\GoPilot\\go-pilot\\.worktrees\\auth-refactor"}}
+{"event":"task.completed","task":{"id":1,"status":"completed","subject":"Implement user authentication system"},"ts":1775551377.7031393,"worktree":{"name":"auth-refactor"}}
+{"event":"worktree.remove.after","task":{"id":1},"ts":1775551377.7042685,"worktree":{"name":"auth-refactor","path":"D:\\Projects\\go\\GoPilot\\go-pilot\\.worktrees\\auth-refactor","status":"removed"}}
