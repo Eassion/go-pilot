@@ -1,1 +1,1 @@
-{"content":"Please send a message to Bob introducing yourself and letting him know you're working on a new feature that will need testing soon.","from":"lead","timestamp":1775462693.4974966,"type":"message"}
+{"content":"Please shut down gracefully.","from":"lead","request_id":"49521431","timestamp":1775485815.0378475,"type":"shutdown_request"}
