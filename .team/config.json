@@ -1,20 +1,4 @@
 {
   "team_name": "default",
-  "members": [
-    {
-      "name": "alice",
-      "role": "backend-developer",
-      "status": "working"
-    },
-    {
-      "name": "bob",
-      "role": "fullstack-developer",
-      "status": "working"
-    },
-    {
-      "name": "CoderCharlie",
-      "role": "coder",
-      "status": "working"
-    }
-  ]
+  "members": []
 }

@@ -19,6 +19,7 @@ Go rewrite project for `learn-claude-code`.
 - [x] `s10`: team protocols (`shutdown_request/response` + `plan_approval` with request_id tracking)
 - [x] `s11`: autonomous agents (`idle/claim_task` + task-board polling + auto-claim)
 - [x] `s12`: worktree + task isolation (`worktree_*` tools + `.worktrees/index.json` + `events.jsonl`)
+- [x] `s_full`: capstone merge of `s01-s11` (all core tools + auto-compact + bg notifications + team orchestration)
 
 ## Run s01
 
@@ -117,4 +118,12 @@ go run ./cmd/s11
 cd go-pilot
 Copy-Item .env.example .env
 go run ./cmd/s12
+```
+
+## Run s_full
+
+```powershell
+cd go-pilot
+Copy-Item .env.example .env
+go run ./cmd/s_full
 ```

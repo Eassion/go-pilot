@@ -1,8 +1,0 @@
-{
-  "id": 3,
-  "subject": "Write API documentation",
-  "description": "Document all API endpoints with Swagger/OpenAPI specification. Include request/response examples, authentication requirements, and error codes.",
-  "status": "in_progress",
-  "blockedBy": [],
-  "owner": "CoderCharlie"
-}
